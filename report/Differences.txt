@@ -1,0 +1,16 @@
+1 - They use different definitions for a cell in voronoi grap.
+	hedcutter defines with site and coverage, each pixel
+	voronoi uses the edges and the bounds of the image to define cells
+	
+2 - Hedcutter has a GPU implementation, which calculates the voronoi graph using cones.
+
+3 - Different ways of initial distribution:
+	
+	
+	
+	
+	________________________
+improvements:
+
+1- better starting approximation of the final image
+2- considering the average case of point displacement instead of the largest displacement.	

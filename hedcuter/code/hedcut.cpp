@@ -7,8 +7,9 @@ Hedcut::Hedcut()
 	//control flags
 	disk_size = 1;        //if uniform_disk_size is true, all disks have radius=disk_size,
 	                      //othewise, the largest disks will have their radii=disk_size 
-
+    deviation = 7;
 	uniform_disk_size = false; //true if all disks have the same size. disk_size is used when uniform_disk_size is true.
+    collision = true;          //true if disks are allowed to collide
 	black_disk = false;        //true if all disks are black ONLY
 
 	//cvt control flags
@@ -68,6 +69,10 @@ void Hedcut::sample_initial_points(cv::Mat & img, int n, std::vector<cv::Point2d
 	//create n points that spread evenly that are in areas of black points...
 	int count = 0;
 
+    std::default_random_engine generator;
+    std::exponential_distribution<double> distribution(deviation);
+
+
 	cv::RNG rng_uniform(time(NULL));
 	cv::RNG rng_gaussian(time(NULL));
 	cv::Mat visited(img.size(), CV_8U, cv::Scalar::all(0)); //all unvisited
@@ -80,7 +85,8 @@ void Hedcut::sample_initial_points(cv::Mat & img, int n, std::vector<cv::Point2d
 
 		//decide to keep basic on a probability (black has higher probability)
 		float value = img.at<uchar>(r, c)*1.0/255; //black:0, white:1
-		float gr = fabs(rng_gaussian.gaussian(0.8));
+		//float gr = fabs(rng_gaussian.gaussian(0.8));
+        float gr = (float)abs(distribution(generator));
 		if ( value < gr && visited.at<uchar>(r, c) ==0) //keep
 		{
 			count++;
@@ -99,6 +105,11 @@ void Hedcut::sample_initial_points(cv::Mat & img, int n, std::vector<cv::Point2d
 		cv::imshow("samples", tmp);
 		cv::waitKey();
 	}
+}
+
+inline float distance(cv::Point p1, cv::Point p2) {
+	return (sqrt(pow(p1.x - p2.x,2)+ pow(p1.y - p2.y, 2)));
+
 }
 
 void Hedcut::create_disks(cv::Mat & img, CVT & cvt)
@@ -126,6 +137,44 @@ void Hedcut::create_disks(cv::Mat & img, CVT & cvt)
 		r = floor(r / cell.coverage.size());
 		g = floor(g / cell.coverage.size());
 		b = floor(b / cell.coverage.size());
+
+
+		cv::Point2d up_pos = cell.site,
+			down_pos = cell.site,
+			left_pos = cell.site,
+			right_pos = cell.site;
+
+		if (!uniform_disk_size) {
+			for (auto& c : cell.coverage){
+				if (c.y - left_pos.y < std::numeric_limits<float>::epsilon()) {
+					if (c.x <= left_pos.x) {
+						left_pos = c;
+					}
+					else if (right_pos.x <= c.x) {
+						right_pos = c;
+					}
+				}
+				else if (c.x - left_pos.x < std::numeric_limits<float>::epsilon()) {
+					if (c.y <= left_pos.y) {
+						up_pos = c;
+					}
+					else if (right_pos.y <= c.y) {
+						down_pos = c;
+					}
+				}
+			}
+            float diameter;
+            if(collision){
+                 diameter = std::max(distance(right_pos , left_pos), distance(up_pos , down_pos));
+            }
+            else{
+                 diameter = std::min(distance(right_pos , left_pos), distance(up_pos , down_pos));
+            }
+			
+            if(diameter <10)
+			    disk_size = diameter;
+            else disk_size = 5;
+		}
 
 		//create a disk
 		HedcutDisk disk;

@@ -45,6 +45,8 @@ int main(int argc, char ** argv)
 			if (string(argv[i]) == "-debug") hedcut.debug=debug = true;
 			else if (string(argv[i]) == "-n" && i + 1 < argc) sample_size = atoi(argv[++i]);
 			else if (string(argv[i]) == "-uniform_radius") hedcut.uniform_disk_size = true;
+            else if (string(argv[i]) == "-noCollision") hedcut.collision = false;
+            else if (string(argv[i]) == "-deviation"&& i + 1 < argc) hedcut.deviation = atoi(argv[++i]);
 			else if (string(argv[i]) == "-radius" && i + 1 < argc) hedcut.disk_size = atof(argv[++i]);
 			else if (string(argv[i]) == "-iteration" && i + 1 < argc) hedcut.cvt_iteration_limit = atoi(argv[++i]);
 			else if (string(argv[i]) == "-maxD" && i + 1 < argc) hedcut.max_site_displacement = atof(argv[++i]);

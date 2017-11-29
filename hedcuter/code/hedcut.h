@@ -32,8 +32,11 @@ public:
 	//control flags
 	float disk_size;        //if uniform_disk_size is true, all disks have radius=disk_size,
 	                        //othewise, the largest disks will have their radii=disk_size 
+    float deviation;        //The deviation variable for the starting distribution
 
 	bool uniform_disk_size; //true if all disks have the same size. disk_size is used when uniform_disk_size is true.
+    
+    bool collision;         //true if collisions are allowed
 
 	bool black_disk;        //true if all disks are black ONLY
 
